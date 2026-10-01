@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="NeuroTrack — real-time behaviour and usability intelligence: clicks, rage and dead clicks, heatmaps, session replay, dwell time and a live usability score.">
+<meta name="theme-color" content="#090b11">
+<title>NeuroTrack • Next-Gen Behaviour Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  
+  /* Dark Theme Default */
+  --bg: #090b11;
+  --bg-dots: rgba(255, 255, 255, 0.07);
+  --panel: rgba(18, 22, 34, 0.78);
+  --panel-solid: #121622;
+  --panel-card: rgba(26, 32, 48, 0.65);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-light: rgba(255, 255, 255, 0.14);
+  --ink: #f8fafc;
+  --ink-sub: #94a3b8;
+  --ink-dim: #64748b;
+  
+  --primary: #6366f1;
+  --primary-glow: rgba(99, 102, 241, 0.35);
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6, 182, 212, 0.3);
+  --rage: #f43f5e;
+  --rage-glow: rgba(244, 63, 94, 0.35);
+  --emerald: #10b981;
+  --amber: #f59e0b;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 12px 36px -8px rgba(0,0,0,0.5), 0 0 0 1px var(--line);
+}
+
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --bg-dots: rgba(0, 0, 0, 0.06);
+  --panel: rgba(255, 255, 255, 0.85);
+  --panel-solid: #ffffff;
+  --panel-card: rgba(255, 255, 255, 0.9);
+  --line: rgba(0, 0, 0, 0.08);
+  --line-light: rgba(0, 0, 0, 0.14);
+  --ink: #0f172a;
+  --ink-sub: #475569;
+  --ink-dim: #94a3b8;
+  --primary: #4f46e5;
+  --primary-glow: rgba(79, 70, 229, 0.2);
+  --cyan: #0284c7;
+  --cyan-glow: rgba(2, 132, 199, 0.2);
+  --rage: #e11d48;
+  --rage-glow: rgba(225, 29, 72, 0.2);
+  --emerald: #059669;
+  --amber: #d97706;
+  --shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.1), 0 0 0 1px var(--line);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 150px;
+  background-color: var(--bg);
+}
+body {
+  position: relative;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--bg-dots) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color .3s, color .3s;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-dim); }
+
+/* Sticky Control Deck */
+#tracker {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--panel);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 10px 24px;
+  transition: all .3s ease;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+}
+.row + .row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--cyan));
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px var(--primary-glow);
+  font-weight: 800;
+  font-size: 15px;
+}
+.brand-title {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brand-tag {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--line);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+
+/* Status Pill */
+.state-pill {
+  font: 500 12px/1 var(--font-mono);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--emerald);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  transition: all .25s ease;
+}
+.state-pill .radar {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--emerald);
+  position: relative;
+}
+.state-pill .radar::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: var(--emerald);
+  opacity: .5;
+  animation: pulse 1.8s infinite cubic-bezier(0.24, 0, 0.38, 1);
+}
+@keyframes pulse {
+  0% { transform: scale(1); opacity: .7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.state-pill.paused {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--amber);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.state-pill.paused .radar, .state-pill.paused .radar::after {
+  background: var(--amber);
+  animation: none;
+}
+
+/* Segmented Control & Button Styling */
+.btn-group {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--line);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  gap: 2px;
+}
+[data-theme="light"] .btn-group {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+button {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12.5px;
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-card);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all .18s ease;
+  user-select: none;
+}
+button:hover {
+  background: var(--line-light);
+  border-color: var(--ink-dim);
+  transform: translateY(-1px);
+}
+button:active {
+  transform: translateY(0);
+}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn-group button {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--ink-sub);
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.btn-group button:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+}
+.btn-group button.active {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+button.accent {
+  background: linear-gradient(135deg, var(--primary), #4338ca);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+button.accent:hover {
+  opacity: .93;
+  transform: translateY(-1px);
+}
+button.rage-btn {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: var(--rage);
+}
+button.rage-btn:hover {
+  background: rgba(244, 63, 94, 0.2);
+}
+
+/* Metrics Ribbon */
+.metrics-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  align-items: center;
+  font-family: var(--font-mono);
+}
+.metric-chip {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11.5px;
+}
+.metric-chip dt {
+  color: var(--ink-sub);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.metric-chip dd {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.metric-chip.rage dd {
+  color: var(--rage);
+  animation: jitter .3s ease;
+}
+.metric-chip.depth dd {
+  color: var(--cyan);
+}
+.last-click-txt {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-sub);
+}
+
+/* Replay Bar (Floating) */
+#replayDeck {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-solid);
+  border: 1px solid var(--primary);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 20px var(--primary-glow);
+  border-radius: 30px;
+  padding: 8px 18px;
+  z-index: 2000;
+  align-items: center;
+  gap: 14px;
+}
+#replayDeck.show { display: flex; animation: slideUp .25s ease; }
+@keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+#virtualCursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(6, 182, 212, 0.7);
+  box-shadow: 0 0 16px var(--cyan);
+  border: 2px solid #fff;
+  pointer-events: none;
+  z-index: 2100;
+  display: none;
+  margin: -10px 0 0 -10px;
+  transition: transform 0.06s linear;
+}
+
+/* Canvas Overlay */
+#overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 500;
+}
+
+/* Main Content Area */
+main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Section styling */
+section {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--panel-card);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+  transition: border-color .2s;
+}
+section:hover {
+  border-color: var(--line-light);
+}
+
+.sec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.sec-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--line);
+  color: var(--cyan);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.dwell-pill {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-dim);
+  background: rgba(0,0,0,0.15);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+}
+
+h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--ink) 30%, var(--ink-sub));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+p {
+  color: var(--ink-sub);
+  margin-bottom: 16px;
+  font-size: 15px;
+  max-width: 68ch;
+}
+.lead {
+  font-size: 17px;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Hero Badge */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 30px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15));
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: var(--cyan);
+  margin-bottom: 18px;
+}
+.hero-badge span.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Feature Cards Grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.card {
+  border: 1px solid var(--line);
+  background: var(--panel-solid);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px -6px var(--primary-glow);
+}
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--primary);
+}
+.card h3 { font-size: 16px; font-weight: 600; }
+.card p { font-size: 13.5px; margin-bottom: 0; color: var(--ink-sub); }
+
+/* Interactive Sandbox Target */
+.target-box {
+  margin-top: 18px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--line-light);
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,0.1);
+  color: var(--ink-sub);
+  text-align: center;
+  padding: 24px;
+  cursor: crosshair;
+  transition: all .2s;
+}
+.target-box:hover {
+  border-color: var(--cyan);
+  background: rgba(6, 182, 212, 0.04);
+}
+.target-box .radar-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: var(--cyan);
+}
+
+/* Rage Click Stress Test Box */
+.stress-box {
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  background: rgba(244, 63, 94, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+.stress-box.shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Interactive Tabs & Controls */
+.tab-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink-sub);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.tab-btn.active {
+  color: var(--primary);
+  background: var(--line);
+}
+
+.interactive-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 0;
+}
+input[type="range"] {
+  flex: 1;
+  accent-color: var(--primary);
+  height: 6px;
+  cursor: pointer;
+}
+
+/* Form Styles */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+input[type="text"], input[type="email"] {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--panel-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13.5px;
+}
+
+/* ===== Usability Intelligence add-on (scoped with ux- prefix) ===== */
+#ux{margin-top:36px;border-radius:var(--radius);border:1px solid var(--line);background:var(--panel-solid);padding:24px;box-shadow:var(--shadow);}
+#ux .ux-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px;}
+#ux h2{font-size:18px;font-weight:700;letter-spacing:-.01em;}
+#ux .ux-sub{font-size:12.5px;color:var(--ink-sub);margin-bottom:18px;}
+#ux .ux-verdict{font:600 12px var(--font-mono);padding:5px 10px;border-radius:20px;border:1px solid rgba(16,185,129,.25);background:rgba(16,185,129,.12);color:var(--emerald);}
+#ux .ux-verdict.warn{border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.12);color:var(--amber);}
+#ux .ux-verdict.bad{border-color:rgba(244,63,94,.3);background:rgba(244,63,94,.12);color:var(--rage);}
+#ux .ux-top{display:grid;grid-template-columns:170px 1fr;gap:20px;align-items:center;margin-bottom:20px;}
+#ux .ux-gauge{text-align:center;}
+#ux svg{width:150px;height:150px;}
+#ux .g-bg{fill:none;stroke:var(--line-light);stroke-width:9;}
+#ux .g-arc{fill:none;stroke:var(--emerald);stroke-width:9;stroke-linecap:round;stroke-dasharray:339.3;stroke-dashoffset:0;transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dashoffset .4s ease,stroke .3s;}
+#ux .g-arc.warn{stroke:var(--amber);} #ux .g-arc.bad{stroke:var(--rage);}
+#ux .g-txt{font:700 30px var(--font-mono);fill:var(--ink);text-anchor:middle;}
+#ux .ux-cap{font-size:11.5px;color:var(--ink-sub);margin-top:-6px;}
+#ux .ux-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+#ux .ux-tile{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px 12px;}
+[data-theme="light"] #ux .ux-tile{background:rgba(0,0,0,.025);}
+#ux .ux-tile b{display:block;font:700 18px var(--font-mono);color:var(--cyan);}
+#ux .ux-tile span{font-size:11.5px;color:var(--ink-sub);}
+#ux .ux-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px;}
+#ux .ux-lab{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-sub);margin-bottom:8px;display:block;}
+#ux canvas{width:100%;height:56px;display:block;border:1px solid var(--line);border-radius:var(--radius-sm);background:rgba(0,0,0,.2);margin-bottom:12px;}
+[data-theme="light"] #ux canvas{background:rgba(0,0,0,.03);}
+#ux .ux-map{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px;background:rgba(0,0,0,.2);}
+[data-theme="light"] #ux .ux-map{background:rgba(0,0,0,.03);}
+#ux .ux-map i{display:block;height:7px;width:0;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--cyan));transition:width .3s;}
+#ux .ux-map-ends{display:flex;justify-content:space-between;font:11px var(--font-mono);color:var(--ink-dim);margin-top:4px;}
+#ux ul{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:190px;overflow-y:auto;}
+#ux li{font-size:12.5px;padding:8px 10px;border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:var(--radius-sm);background:rgba(255,255,255,.03);overflow-wrap:anywhere;}
+[data-theme="light"] #ux li{background:rgba(0,0,0,.025);}
+#ux li.warn{border-left-color:var(--amber);} #ux li.bad{border-left-color:var(--rage);} #ux li.ok{border-left-color:var(--emerald);}
+#ux li small{font-family:var(--font-mono);color:var(--ink-dim);margin-right:6px;}
+#ux .ux-tagrow{display:flex;gap:8px;margin-bottom:10px;}
+#ux .ux-tagrow input{flex:1;min-width:0;padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:rgba(0,0,0,.18);color:var(--ink);font:13px var(--font-sans);}
+[data-theme="light"] #ux .ux-tagrow input{background:rgba(0,0,0,.04);}
+#ux .ux-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);}
+@media(max-width:720px){#ux .ux-top,#ux .ux-cols{grid-template-columns:1fr;}#ux .ux-tiles{grid-template-columns:repeat(2,1fr);}}
+
+/* Output Console */
+#output {
+  margin-top: 36px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel-solid);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.out-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 14px;
+}
+@media (max-width: 720px) { .out-grid { grid-template-columns: 1fr; } }
+
+.console-pane {
+  display: flex;
+  flex-direction: column;
+}
+.pane-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.pane-head label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-sub);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#log {
+  height: 250px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.25);
+  border-radius: var(--radius-sm);
+  font: 11.5px/1.6 var(--font-mono);
+  padding: 10px;
+}
+#log div {
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  display: flex;
+  gap: 10px;
+}
+#log .badge-ev {
+  font-weight: 700;
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 10px;
+}
+.badge-click { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+.badge-rage { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+.badge-scroll { background: rgba(6, 182, 212, 0.2); color: #38bdf8; }
+.badge-move { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+.badge-view { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+textarea {
+  width: 100%;
+  height: 250px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.25);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font: 11.5px/1.5 var(--font-mono);
+  padding: 10px;
+  resize: vertical;
+}
+
+/* Modal Dialog */
+dialog {
+  border: 1px solid var(--line-light);
+  border-radius: var(--radius);
+  padding: 0;
+  width: min(620px, 94vw);
+  max-height: 88vh;
+  background: var(--panel-solid);
+  color: var(--ink);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  margin: auto;
+}
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+}
+.dlg-body {
+  padding: 28px;
+  overflow-y: auto;
+}
+.dlg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 16px 0 24px;
+}
+.dlg-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+.dlg-card b {
+  display: block;
+  font: 700 22px var(--font-mono);
+  color: var(--cyan);
+}
+.dlg-card span {
+  font-size: 11.5px;
+  color: var(--ink-sub);
+}
+.tbl-wrap {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+th {
+  font: 600 11px var(--font-mono);
+  text-transform: uppercase;
+  color: var(--ink-sub);
+  background: rgba(255,255,255,0.02);
+}
+td.n, th.n {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+.bar-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pct-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan));
+}
+.dlg-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* Click Ripple in DOM */
+.click-ripple {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--cyan) 10%, transparent 70%);
+  border: 2px solid var(--cyan);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.4);
+  animation: rippleFx 0.55s ease-out forwards;
+  z-index: 600;
+}
+@keyframes rippleFx {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .state-pill .radar::after, .click-ripple { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<header id="tracker" data-ignore>
+  <div class="row">
+    <div class="brand-wrap">
+      <div class="logo-badge">⚡</div>
+      <div class="brand-title">NeuroTrack <span class="brand-tag">v2.4 Pro</span></div>
+      <div class="state-pill" id="statePill"><span class="radar"></span><span id="stateTxt">LIVE RECORDING</span></div>
+    </div>
+
+    <!-- Mode Selector -->
+    <div class="btn-group" id="modes" title="Visual telemetry overlay layers">
+      <button data-mode="off">⊘ Off</button>
+      <button data-mode="clicks" class="active">◉ Clicks</button>
+      <button data-mode="heat">♨ Heatmap</button>
+      <button data-mode="scatter">⁖ Scatter</button>
+      <button data-mode="moves">〰 Moves</button>
+      <button data-mode="path">⚡ Path</button>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+      <button id="bSound" title="Toggle audio feedback">🔊</button>
+      <button id="bTheme" title="Switch light/dark theme">◐</button>
+      <button id="bPause">⏸ Pause</button>
+      <button id="bUndo">↺ Undo</button>
+      <button id="bReplay" style="border-color:var(--cyan); color:var(--cyan)">▶ Replay</button>
+      <button id="bData">JSON</button>
+      <button id="bCsv">CSV</button>
+      <button id="bReset">Reset</button>
+      <button class="accent" id="bSum">📊 Summary</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <dl class="metrics-ribbon">
+      <div class="metric-chip"><dt>Events</dt><dd id="mEv">0</dd></div>
+      <div class="metric-chip"><dt>Clicks</dt><dd id="mCl">0</dd></div>
+      <div class="metric-chip rage" id="chipRage"><dt>Rage</dt><dd id="mRg">0</dd></div>
+      <div class="metric-chip"><dt>Cursor Pts</dt><dd id="mMv">0</dd></div>
+      <div class="metric-chip"><dt>Scrolls</dt><dd id="mSc">0</dd></div>
+      <div class="metric-chip depth"><dt>Max Depth</dt><dd id="mDp">0%</dd></div>
+      <div class="metric-chip"><dt>Active Time</dt><dd id="mTm">0s</dd></div>
+      <div class="metric-chip"><dt>Last Target</dt><dd id="mLast" class="last-click-txt">—</dd></div>
+    </dl>
+  </div>
+</header>
+
+<!-- Floating Replay Player Deck -->
+<div id="replayDeck" data-ignore>
+  <button id="rpPlay" class="accent">⏸ Pause</button>
+  <span style="font:600 12px var(--font-mono); color:var(--cyan)" id="rpTime">00:00</span>
+  <input type="range" id="rpProgress" min="0" max="100" value="0" style="width:140px">
+  <button id="rpSpeed">1x</button>
+  <button id="rpExit">✕ Close</button>
+</div>
+<div id="virtualCursor"></div>
+
+<canvas id="overlay" aria-hidden="true"></canvas>
+
+<main>
+  <!-- Hero Section -->
+  <section data-track="Hero" id="top">
+    <div class="sec-header">
+      <span class="sec-tag">◈ LIVE TELEMETRY HARNESS</span>
+      <span class="dwell-pill" id="dwell-Hero">⏱ 0.0s in view</span>
+    </div>
+    <div class="hero-badge"><span class="dot"></span> Autonomous Session Analytics Loaded</div>
+    <h1>Observe, analyze & elevate digital user journeys</h1>
+    <p class="lead">Every interaction, rage micro-frustration, cursor trajectory, and spatial dwell period is measured in real-time right in this tab. 100% private and client-side.</p>
+    <p>The top HUD bar and developer console below are excluded with <code>data-ignore</code>. Every pixel in the sandbox below is actively instrumented.</p>
+    <div class="hero-actions">
+      <button class="accent" id="btnMainCta">🚀 Launch Free Trial</button>
+      <button id="btnExplore">Explore Interactive Features</button>
+      <button data-go="features">Jump to Feature Matrix ↓</button>
+    </div>
+  </section>
+
+  <!-- Feature Grid Section -->
+  <section data-track="Features" id="features">
+    <div class="sec-header">
+      <span class="sec-tag">❖ SYSTEM CAPABILITIES</span>
+      <span class="dwell-pill" id="dwell-Features">⏱ 0.0s in view</span>
+    </div>
+    <h2>Engineered for UX Precision</h2>
+    <p>Interact with cards and controls below to generate high-density interaction signals.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div>
+          <h3>Spatial Heatmaps</h3>
+          <p>Instant Gaussian kernel accumulation mapped to exact viewport coordinates.</p>
+        </div>
+        <button id="btnCard1">Inspect Density</button>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <div>
+          <h3>Path Reconstruction</h3>
+          <p>Interpolated vector splines with speed derivatives and directional vectors.</p>
+        </div>
+        <button id="btnCard2">Trace Vectors</button>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡</div>
+        <div>
+          <h3>Zero Data Exfiltration</h3>
+          <p>All behavioral telemetry stays isolated within your browser tab memory.</p>
+        </div>
+        <button id="btnCard3">Security Specs</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Sandbox & Stress Test Section -->
+  <section data-track="Sandbox" id="sandbox">
+    <div class="sec-header">
+      <span class="sec-tag">⚙ INTERACTIVE SANDBOX</span>
+      <span class="dwell-pill" id="dwell-Sandbox">⏱ 0.0s in view</span>
+    </div>
+    <h2>Interactive Target & Heuristic Tests</h2>
+    <p>Experiment with sliders, tabs, and test frustrating UX patterns.</p>
+    
+    <div class="tab-controls">
+      <button class="tab-btn active" data-tab="tab1">Overview</button>
+      <button class="tab-btn" data-tab="tab2">Telemetry Specs</button>
+      <button class="tab-btn" data-tab="tab3">Network Latency</button>
+    </div>
+
+    <div class="interactive-slider-wrap">
+      <span style="font-size:13px; font-weight:600">Sample Sensitivity:</span>
+      <input type="range" id="rateSlider" min="10" max="100" value="65">
+      <span id="sliderVal" style="font-family:var(--font-mono); font-size:12px">65%</span>
+    </div>
+
+    <!-- Rage Click Trigger Area -->
+    <div class="stress-box" id="stressBox">
+      <div>
+        <strong style="color:var(--rage)">🔥 Rage Click Stress Detector</strong>
+        <p style="margin:2px 0 0; font-size:13px">Click rapidly 3+ times in the same spot (&lt; 30px) within 700ms to trigger a rage incident.</p>
+      </div>
+      <button class="rage-btn" id="btnRageTest">Rapid Click Here</button>
+    </div>
+
+    <div class="target-box" id="targetBox">
+      <div class="radar-icon">◎</div>
+      <strong>Primary Spatial Reticle</strong>
+      <span style="font-size:13px">Move or click within this bounded target zone</span>
+    </div>
+  </section>
+
+  <!-- Contact & Dwell Depth Section -->
+  <section data-track="Contact" id="contact">
+    <div class="sec-header">
+      <span class="sec-tag">✉ TELEMETRY ENDPOINT</span>
+      <span class="dwell-pill" id="dwell-Contact">⏱ 0.0s in view</span>
+    </div>
+    <h2>Feedback & Session Completion</h2>
+    <p>Test input focus and submit behaviors. Scroll here to achieve 100% max scroll depth.</p>
+    <div class="form-grid">
+      <input type="text" placeholder="Your Name" id="inputName">
+      <input type="email" placeholder="Work Email" id="inputEmail">
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button class="accent" id="btnSubmit">Submit Interaction</button>
+      <button data-go="top">↑ Back to Top</button>
+    </div>
+  </section>
+
+  <!-- Usability Intelligence (add-on) -->
+  <div id="ux" data-ignore>
+    <div class="ux-head"><h2>Usability Intelligence</h2><span class="ux-verdict" id="uxVerdict">Excellent</span></div>
+    <p class="ux-sub">Live friction analysis: rage and dead clicks, cursor behaviour, idle time and scroll attention roll up into one score.</p>
+    <div class="ux-top">
+      <div class="ux-gauge">
+        <svg viewBox="0 0 120 120" role="img" aria-label="Usability score"><circle class="g-bg" cx="60" cy="60" r="54"></circle><circle class="g-arc" id="uxArc" cx="60" cy="60" r="54"></circle><text class="g-txt" id="uxScore" x="60" y="70">100</text></svg>
+        <div class="ux-cap">Usability score</div>
+      </div>
+      <div class="ux-tiles">
+        <div class="ux-tile"><b id="uxDead">0</b><span>Dead clicks</span></div>
+        <div class="ux-tile"><b id="uxDist">0 px</b><span>Cursor travel</span></div>
+        <div class="ux-tile"><b id="uxTurns">0</b><span>Direction changes</span></div>
+        <div class="ux-tile"><b id="uxState">Active</b><span>Attention state</span></div>
+        <div class="ux-tile"><b id="uxIdle">0s</b><span>Idle time</span></div>
+        <div class="ux-tile"><b id="uxKb">0%</b><span>Keyboard share</span></div>
+      </div>
+    </div>
+    <div class="ux-cols">
+      <div>
+        <span class="ux-lab">Cursor speed (px/s)</span><canvas id="uxSpeed" width="600" height="56"></canvas>
+        <span class="ux-lab">Clicks per interval</span><canvas id="uxCps" width="600" height="56"></canvas>
+      </div>
+      <div>
+        <span class="ux-lab">Scroll attention (time by page depth)</span>
+        <div class="ux-map" id="uxMap" aria-label="Scroll attention map"></div>
+        <div class="ux-map-ends"><span>Top</span><span>Bottom</span></div>
+      </div>
+    </div>
+    <div class="ux-cols">
+      <div><span class="ux-lab">Friction findings</span><ul id="uxFindings" aria-live="polite"></ul></div>
+      <div>
+        <span class="ux-lab">Moment tagging</span>
+        <div class="ux-tagrow"><input id="uxTagIn" type="text" placeholder="Describe this moment…" maxlength="80"><button id="uxTagBtn">🏷 Tag moment</button></div>
+        <ul id="uxTags"></ul>
+      </div>
+    </div>
+    <div class="ux-actions"><button class="accent" id="uxExport">Export usability report</button><button id="uxCopy">Copy report JSON</button></div>
+  </div>
+
+  <!-- Live Output Console -->
+  <div id="output" data-ignore>
+    <div class="pane-head">
+      <h2>Telemetry Console & Stream Inspector</h2>
+      <label><input type="checkbox" id="logAll"> Include cursor streaming & scrolls</label>
+    </div>
+    <div class="out-grid">
+      <div class="console-pane">
+        <div class="pane-head">
+          <label>Live Event Stream</label>
+          <span style="font-size:11px; font-family:var(--font-mono); color:var(--ink-dim)" id="streamCount">0 entries</span>
+        </div>
+        <div id="log" aria-live="polite"></div>
+      </div>
+      <div class="console-pane">
+        <div class="pane-head">
+          <label>Active Session Payload</label>
+          <button id="bCopyJson" style="padding:2px 8px; font-size:11px;">Copy JSON</button>
+        </div>
+        <textarea id="json" readonly placeholder="Click “JSON” or “Summary” in the HUD to render raw export payload..."></textarea>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Executive Summary Modal -->
+<dialog id="dlg" data-ignore>
+  <div class="dlg-body">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <h2>Session Telemetry Summary</h2>
+        <p style="font-size:13px; margin:0">Comprehensive audit of user engagement, spatial distribution & dwell times.</p>
+      </div>
+      <span class="brand-tag" id="dlgSessionId">ID: —</span>
+    </div>
+
+    <div class="dlg-grid">
+      <div class="dlg-card"><b id="sCl">0</b><span>Total Clicks</span></div>
+      <div class="dlg-card"><b id="sRg" style="color:var(--rage)">0</b><span>Rage Clicks</span></div>
+      <div class="dlg-card"><b id="sRate">0</b><span>Clicks / Min</span></div>
+      <div class="dlg-card"><b id="sMv">0</b><span>Cursor Samples</span></div>
+      <div class="dlg-card"><b id="sDp" style="color:var(--cyan)">0%</b><span>Max Depth</span></div>
+      <div class="dlg-card"><b id="sTm">0s</b><span>Active Dwell</span></div>
+    </div>
+
+    <h3 style="font-size:13px; font-family:var(--font-mono); text-transform:uppercase; color:var(--ink-sub); margin-bottom:8px">Top Interacted Elements</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Element & Target Selector</th><th class="n">Frequency</th><th style="width:120px" class="n">Density</th></tr></thead>
+        <tbody id="tClicks"></tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:13px; font-family:var(--font-mono); text-transform:uppercase; color:var(--ink-sub); margin-bottom:8px">Section Engagement Dwell</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Section</th><th class="n">Active Time</th><th style="width:120px" class="n">Dwell Share</th></tr></thead>
+        <tbody id="tDwell"></tbody>
+      </table>
+    </div>
+
+    <div class="dlg-actions">
+      <button id="dJson">Export JSON</button>
+      <button id="dCsv">Export CSV</button>
+      <button class="accent" id="dClose">Close Audit</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Main Usability & Tracking Engine -->
+<script src="tracker.js"></script>
+</body>
+</html>
