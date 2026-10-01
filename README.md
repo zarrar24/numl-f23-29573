@@ -26,11 +26,11 @@ This project is deployed and accessible via **GitHub Pages**:
 
 This repository strictly contains **1 code file**, **1 js file**, and **1 readme file**:
 
-`	ext
+```text
 ├── index.html        # UI markup, design tokens, HUD, and interactive test harness
 ├── tracker.js        # Core spatial telemetry recorder & usability intelligence engine
 └── README.md         # Project documentation and architectural overview
-`
+```
 
 ---
 
@@ -66,10 +66,10 @@ This repository strictly contains **1 code file**, **1 js file**, and **1 readme
 No build tools or web servers are required:
 
 1. Clone the repository:
-   `ash
+   ```bash
    git clone https://github.com/zarrar24/numl-f23-29573.git
-   `
-2. Open index.html directly in any modern browser (Google Chrome, Microsoft Edge, Firefox, Safari).
+   ```
+2. Open `index.html` directly in any modern browser (Google Chrome, Microsoft Edge, Firefox, Safari).
 
 ---
 
