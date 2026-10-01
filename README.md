@@ -37,7 +37,7 @@ This repository strictly contains **1 code file**, **1 js file**, and **1 readme
 ## Key Features
 
 ### 1. Usability Intelligence & Scoring
-- **Dynamic Usability Score (0–100)**: Evaluates user friction using automated penalties for rage clicks, dead clicks, erratic cursor motion, and excessive idle periods.
+- **Dynamic Usability Score (0-100)**: Evaluates user friction using automated penalties for rage clicks, dead clicks, erratic cursor motion, and excessive idle periods.
 - **Rage Click Detection**: Flags rapid clicking (3+ clicks within 30px in less than 700ms) with auditory feedback and element vibration.
 - **Dead Click Auditor**: Detects clicks on non-interactive elements that users mistakenly expect to respond.
 - **Sparkline Visualizations**: Live canvas sparklines showing cursor velocity (px/s) and clicks-per-interval.
